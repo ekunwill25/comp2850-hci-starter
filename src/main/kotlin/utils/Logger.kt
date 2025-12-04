@@ -1,7 +1,15 @@
+package utils
+
+import java.io.File
+import java.time.Instant
+import java.time.format.DateTimeFormatter
+
 object Logger {
     private val file = File("data/metrics.csv").apply {
         parentFile?.mkdirs()
-        if (!exists()) writeText("ts_iso,session_id,request_id,task_code,step,outcome,ms,http_status,js_mode\n")
+        if (!exists()) {
+            writeText("ts_iso,session_id,request_id,task_code,step,outcome,ms,http_status,js_mode\n")
+        }
     }
 
     @Synchronized
