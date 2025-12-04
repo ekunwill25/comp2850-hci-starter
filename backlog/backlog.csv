@@ -1,5 +1,4 @@
 id,title,story_ref,story_type,need,type,severity,inclusion_risk,evidence,notes,candidate_fix
-id,title,story_ref,story_type,need,type,severity,inclusion_risk,evidence,notes,candidate_fix
 1,Filter selection resets on page reload,stories.md#S1,Job story,Reduce cognitive load,Usability,Low,"Cognitive,Memory","stories.md#S1",Current implementation doesn't persist filter state in session or URL,false
 2,No confirmation after form submission,stories.md#S2,Job story,Trust & feedback,Accessibility,Medium,"Cognitive,SR,Low digital literacy","stories.md#S2",HTMX shows status in live region (good) but no-JS path gives no feedback (PRG redirect with no message),false
 3,Changes don't sync across devices,stories.md#S3,Job story,Data persistence,Usability,Medium,"Cognitive load,All users","stories.md#S3",No real-time sync mechanism; users experience data loss when switching devices,false
