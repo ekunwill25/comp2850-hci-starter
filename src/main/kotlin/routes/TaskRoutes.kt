@@ -120,6 +120,64 @@ fun Route.taskRoutes() {
         // No-JS path: PRG redirect
         call.respondRedirect("/tasks")
     }
+
+        post("/tasks/{id}/edit") {
+        val id = call.parameters["id"]?.toIntOrNull() ?: return@post call.respond(HttpStatusCode.NotFound)
+        val task = TaskRepository.get(id) ?: return@post call.respond(HttpStatusCode.NotFound)
+
+        val newTitle = call.receiveParameters()["title"].orEmpty().trim()
+
+        // Validation
+        if (newTitle.isBlank()) {
+            if (call.isHtmx()) {
+                // HTMX path: return edit fragment with error
+                val html = call.renderTemplate(
+                    "tasks/_edit.peb",
+                    mapOf(
+                        "task" to task,
+                        "error" to "Title is required. Please enter at least one character."
+                    )
+                )
+                return@post call.respondText(html, ContentType.Text.Html, HttpStatusCode.BadRequest)
+            } else {
+                // No-JS path: redirect with error flag
+                return@post call.respondRedirect("/tasks/${id}/edit?error=blank")
+            }
+        }
+
+        // Update task
+        val updatedTask = TaskRepository.update(id, newTitle)
+        if (updatedTask == null) {
+            return@post call.respond(HttpStatusCode.NotFound, "Task not found")
+        }
+
+        if (call.isHtmx()) {
+            // HTMX path: return view fragment + OOB status
+            val viewHtml = call.renderTemplate(
+                "tasks/_item.peb",
+                mapOf("task" to updatedTask)
+            )
+
+            val status = """<div id="status" hx-swap-oob="true">Task "${updatedTask.title}" updated successfully.</div>"""
+
+            return@post call.respondText(viewHtml + status, ContentType.Text.Html)
+        }
+
+        // No-JS path: PRG redirect
+        call.respondRedirect("/tasks")
+    }
+
+        get("/tasks/{id}/view") {
+        val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.NotFound)
+        val task = TaskRepository.get(id) ?: return@get call.respond(HttpStatusCode.NotFound)
+
+        // HTMX path only (cancel is just a link to /tasks in no-JS)
+        val html = call.renderTemplate(
+            "tasks/_item.peb",
+            mapOf("task" to task)
+        )
+        call.respondText(html, ContentType.Text.Html)
+    }
 }
 
     
