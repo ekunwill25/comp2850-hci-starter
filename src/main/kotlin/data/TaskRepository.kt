@@ -26,6 +26,15 @@ object TaskRepository {
         }
     }
 
+    fun get(id: Int): Task? = tasks.find { it.id == id }
+
+    fun update(id: Int, newTitle: String): Task? {
+        val task = tasks.find { it.id == id } ?: return null
+        task.title = newTitle
+        persist()
+        return task
+    }
+
     fun all(): List<Task> = tasks.toList()
 
     fun add(title: String): Task {

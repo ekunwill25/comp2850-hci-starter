@@ -44,7 +44,84 @@ fun Route.taskRoutes() {
         }
 
         call.respondRedirect("/tasks")
+
+        get("/tasks/{id}/edit") {
+        val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.NotFound)
+        val task = TaskRepository.get(id) ?: return@get call.respond(HttpStatusCode.NotFound)
+        val errorParam = call.request.queryParameters["error"]
+
+        val errorMessage = when (errorParam) {
+            "blank" -> "Title is required. Please enter at least one character."
+            else -> null
+        }
+
+        if (call.isHtmx()) {
+            // HTMX path: return edit fragment
+            val html = call.renderTemplate(
+                "tasks/_edit.peb",
+                mapOf("task" to task, "error" to (errorMessage ?: ""))
+            )
+            call.respondText(html, ContentType.Text.Html)
+        } else {
+            // No-JS path: full-page render with editingId
+            val html = call.renderTemplate(
+                "tasks/index.peb",
+                mapOf(
+                    "title" to "Tasks",
+                    "tasks" to TaskRepository.all(),
+                    "editingId" to id,
+                    "errorMessage" to (errorMessage ?: "")
+                )
+            )
+            call.respondText(html, ContentType.Text.Html)
+        }
+        post("/tasks/{id}/edit") {
+        val id = call.parameters["id"]?.toIntOrNull() ?: return@post call.respond(HttpStatusCode.NotFound)
+        val task = TaskRepository.get(id) ?: return@post call.respond(HttpStatusCode.NotFound)
+
+        val newTitle = call.receiveParameters()["title"].orEmpty().trim()
+
+        // Validation
+        if (newTitle.isBlank()) {
+            if (call.isHtmx()) {
+                // HTMX path: return edit fragment with error
+                val html = call.renderTemplate(
+                    "tasks/_edit.peb",
+                    mapOf(
+                        "task" to task,
+                        "error" to "Title is required. Please enter at least one character."
+                    )
+                )
+                return@post call.respondText(html, ContentType.Text.Html, HttpStatusCode.BadRequest)
+            } else {
+                // No-JS path: redirect with error flag
+                return@post call.respondRedirect("/tasks/${id}/edit?error=blank")
+            }
+        }
+
+        // Update task
+        val updatedTask = TaskRepository.update(id, newTitle)
+        if (updatedTask == null) {
+            return@post call.respond(HttpStatusCode.NotFound, "Task not found")
+        }
+
+        if (call.isHtmx()) {
+            // HTMX path: return view fragment + OOB status
+            val viewHtml = call.renderTemplate(
+                "tasks/_item.peb",
+                mapOf("task" to updatedTask)
+            )
+
+            val status = """<div id="status" hx-swap-oob="true">Task "${updatedTask.title}" updated successfully.</div>"""
+
+            return@post call.respondText(viewHtml + status, ContentType.Text.Html)
+        }
+
+        // No-JS path: PRG redirect
+        call.respondRedirect("/tasks")
     }
+}
+
     
     post("/tasks/{id}/delete") {
         val id = call.parameters["id"]?.toIntOrNull()
@@ -58,3 +135,4 @@ fun Route.taskRoutes() {
         call.respondRedirect("/tasks")
     }
 }
+
