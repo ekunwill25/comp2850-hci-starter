@@ -13,42 +13,44 @@ fun ApplicationCall.isHtmx(): Boolean =
 
 fun Route.taskRoutes() {
     get("/tasks") {
-        val html = call.renderTemplate(
-            "tasks/index.peb",
-            mapOf(
-                "title" to "Tasks",
-                "tasks" to TaskRepository.all()
-            )
+    val html = call.renderTemplate(
+        "tasks/index.peb",
+        mapOf(
+            "title" to "Tasks",
+            "tasks" to TaskRepository.all(),
+            "editingId" to 0,
+            "errorMessage" to ""
         )
-        call.respondText(html, ContentType.Text.Html)
-    }
+    )
+    call.respondText(html, ContentType.Text.Html)
+}
 
     post("/tasks") {
-        val title = call.receiveParameters()["title"].orEmpty().trim()
+    val title = call.receiveParameters()["title"].orEmpty().trim()
 
-        if (title.isBlank()) {
-            if (call.isHtmx()) {
-                val error = """<div id="status" hx-swap-oob="true" role="alert" aria-live="assertive">Title is required.</div>"""
-                return@post call.respondText(error, ContentType.Text.Html, HttpStatusCode.BadRequest)
-            } else {
-                return@post call.respondRedirect("/tasks?error=required")
-            }
-        }
-
-        val task = TaskRepository.add(title)
-
+    if (title.isBlank()) {
         if (call.isHtmx()) {
-            // Use the template instead of hardcoded HTML
-            val fragment = call.renderTemplate(
-                "tasks/_item.peb",
-                mapOf("task" to task)
-            )
-            val status = """<div id="status" hx-swap-oob="true">Task "${task.title}" added successfully.</div>"""
-            return@post call.respondText(fragment + status, ContentType.Text.Html, HttpStatusCode.Created)
+            val error = """<div id="status" hx-swap-oob="true" role="alert" aria-live="assertive">Title is required.</div>"""
+            return@post call.respondText(error, ContentType.Text.Html, HttpStatusCode.BadRequest)
+        } else {
+            return@post call.respondRedirect("/tasks?error=required")
         }
-
-        call.respondRedirect("/tasks")
     }
+
+    val task = TaskRepository.add(title)
+
+    if (call.isHtmx()) {
+        // Use the template - NO "templates/" prefix
+        val fragment = call.renderTemplate(
+            "tasks/_item.peb",
+            mapOf("task" to task)
+        )
+        val status = """<div id="status" hx-swap-oob="true">Task "${task.title}" added successfully.</div>"""
+        return@post call.respondText(fragment + status, ContentType.Text.Html, HttpStatusCode.Created)
+    }
+
+    call.respondRedirect("/tasks")
+}
 
     post("/tasks/{id}/delete") {
         val id = call.parameters["id"]?.toIntOrNull()
