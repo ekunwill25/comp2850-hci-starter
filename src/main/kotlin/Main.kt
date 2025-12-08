@@ -1,170 +1,126 @@
+package routes
+
+import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.sessions.*
-import io.ktor.server.routing.*
-import io.ktor.server.http.content.*
-import io.ktor.server.plugins.callloging.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
-import io.pebbletemplates.pebble.PebbleEngine
-import routes.taskRoutes
-import routes.configureHealthCheck
-import utils.SessionData
-import java.io.StringWriter
-import io.ktor.util.*
+import io.ktor.server.routing.*
+import storage.TaskStore
+import model.Task
+import renderTemplate
 
-
-fun main() {
-    val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
-    val host = "0.0.0.0" // Required for Codespaces
-
-    embeddedServer(Netty, port = port, host = host) {
-        configureLogging()
-        configureTemplating()
-        configureSessions()
-        configureRouting()
-    }.start(wait = true)
-}
+fun ApplicationCall.isHtmx(): Boolean =
+    request.headers["HX-Request"]?.equals("true", ignoreCase = true) == true
 
 /**
- * Configure request logging for development and debugging.
+ * Main CRUD routes using TaskStore (UUID tasks)
  */
-fun Application.configureLogging() {
-    install(CallLogging) {
-        // Log format: METHOD /path - status (duration ms)
-        format { call ->
-            val status = call.response.status()
-            val method = call.request.httpMethod.value
-            val path = call.request.path()
-            "$method $path - $status"
-        }
-    }
-}
+fun Route.taskRoutes(store: TaskStore = TaskStore()) {
 
+    // GET /tasks
+    get("/tasks") {
+        val tasks = store.getAll()
 
-fun Application.configureTemplating() {
-    val pebbleEngine =
-        PebbleEngine
-            .Builder()
-            .loader(
-                io.pebbletemplates.pebble.loader.ClasspathLoader().apply {
-                    prefix = "templates/"
-                }
-            )
-            .autoEscaping(true) // XSS protection via auto-escaping
-            .cacheActive(false) // Disable cache in dev for hot reload
-            .strictVariables(false) // Allow undefined variables (fail gracefully)
-            .build()
-
-    environment.monitor.subscribe(ApplicationStarted) {
-        log.info("✓ Pebble templates loaded from resources/templates/")
-        log.info("✓ Server running on configured port")
-    }
-
-    // Make Pebble available to all routes
-    attributes.put(PebbleEngineKey, pebbleEngine)
-}
-
-
-val PebbleEngineKey = AttributeKey<PebbleEngine>("PebbleEngine")
-
-/**
- * Render a Pebble template to HTML string.
- *
- * **Usage**:
- * ```kotlin
- * val html = call.renderTemplate("tasks/index.peb", mapOf("tasks" to taskList))
- * call.respondText(html, ContentType.Text.Html)
- * ```
- *
- * **Context enrichment**:
- * - Automatically adds `sessionId` from session
- * - Automatically adds `isHtmx` flag (true if HX-Request header present)
- *
- * @param templateName Template path relative to resources/templates/
- * @param context Data to pass to template (map of variable names to values)
- * @return Rendered HTML string
- */
-suspend fun ApplicationCall.renderTemplate(
-    templateName: String,
-    context: Map<String, Any> = emptyMap(),
-): String {
-    val engine = application.attributes[PebbleEngineKey]
-    val writer = StringWriter()
-    val template = engine.getTemplate(templateName)
-
-    // Add global context available to all templates
-    val sessionData = sessions.get<SessionData>()
-    val enrichedContext =
-        context +
+        val html = call.renderTemplate(
+            "tasks/index.peb",
             mapOf(
-                "sessionId" to (sessionData?.id ?: "anonymous"),
-                "isHtmx" to isHtmxRequest(),
+                "title" to "Tasks",
+                "tasks" to tasks
             )
+        )
 
-    template.evaluate(writer, enrichedContext)
-    return writer.toString()
-}
-
-/**
- * Check if request is from HTMX (progressive enhancement mode).
- *
- * **HTMX detection**:
- * - HTMX adds `HX-Request: true` header to all AJAX requests
- * - Use this to return fragments vs full pages
- *
- * **Pattern**:
- * ```kotlin
- * if (call.isHtmxRequest()) {
- *     // Return partial HTML fragment
- *     call.respondText(render("tasks/_list.peb"))
- * } else {
- *     // Traditional redirect (POST-Redirect-GET)
- *     call.respondRedirect("/tasks")
- * }
- * ```
- */
-fun ApplicationCall.isHtmxRequest(): Boolean = request.headers["HX-Request"] == "true"
-
-/**
- * Configure session handling (privacy-safe anonymous IDs).
- *
- * **Privacy notes**:
- * - Session IDs are random, anonymous (no PII)
- * - Used for metrics correlation only
- * - Cookie is HttpOnly, SameSite=Strict
- * - No tracking across devices/browsers
- */
-fun Application.configureSessions() {
-    install(Sessions) {
-        cookie<SessionData>("COMP2850_SESSION") {
-            cookie.path = "/"
-            cookie.httpOnly = true
-            cookie.extensions["SameSite"] = "Strict"
-            // No maxAge = session cookie (deleted when browser closes)
-        }
+        call.respondText(html, ContentType.Text.Html)
     }
-}
 
-/**
- * Configure application routing.
- *
- * **Route organization**:
- * - Static files: `/static/...` (CSS, JS, HTMX)
- * - Health check: `/health`
- * - Task CRUD: `/tasks`, `/tasks/{id}`, etc.
- */
-fun Application.configureRouting() {
-    routing {
-        // Static files (CSS, JS, HTMX library)
-        staticResources("/static", "static")
+    // POST /tasks
+    post("/tasks") {
+        val title = call.receiveParameters()["title"].orEmpty().trim()
 
-        // Health check endpoint (for monitoring)
-        configureHealthCheck()
+        if (title.isBlank()) {
+            return@post call.respondText(
+                """<p id="status" hx-swap-oob="innerText">Title cannot be blank.</p>""",
+                ContentType.Text.Html,
+                HttpStatusCode.BadRequest
+            )
+        }
 
-        // Task management routes (main feature)
-        // TODO: Week 6 Lab 1 - Implement taskRoutes()
-        taskRoutes()
+        val task = Task(title = title)
+        store.add(task)
+
+        // HTMX partial response
+        if (call.isHtmx()) {
+            val fragment = call.renderTemplate("tasks/_item.peb", mapOf("task" to task))
+            val status = """<p id="status" hx-swap-oob="innerText">Task "${task.title}" added</p>"""
+            return@post call.respondText(fragment + status, ContentType.Text.Html, HttpStatusCode.Created)
+        }
+
+        // non-HTMX fallback
+        call.respondRedirect("/tasks")
+    }
+
+    // DELETE /tasks/{id}
+    delete("/tasks/{id}") {
+        val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
+
+        store.delete(id)
+
+        call.respondText(
+            """<p id="status" hx-swap-oob="innerText">Task deleted</p>""",
+            ContentType.Text.Html,
+            HttpStatusCode.OK
+        )
+    }
+
+    // GET /tasks/{id}/edit
+    get("/tasks/{id}/edit") {
+        val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.NotFound)
+        val task = store.getById(id) ?: return@get call.respond(HttpStatusCode.NotFound)
+
+        if (call.isHtmx()) {
+            val html = call.renderTemplate("tasks/_edit.peb", mapOf("task" to task))
+            return@get call.respondText(html, ContentType.Text.Html)
+        }
+
+        // non-HTMX
+        val html = call.renderTemplate(
+            "tasks/index.peb",
+            mapOf(
+                "title" to "Edit Task",
+                "tasks" to store.getAll(),
+                "editingId" to id
+            )
+        )
+        call.respondText(html, ContentType.Text.Html)
+    }
+
+    // POST /tasks/{id}/edit
+    post("/tasks/{id}/edit") {
+        val id = call.parameters["id"] ?: return@post call.respond(HttpStatusCode.BadRequest)
+        val newTitle = call.receiveParameters()["title"]?.trim()
+
+        if (newTitle.isNullOrBlank()) {
+            return@post call.respond(HttpStatusCode.BadRequest, "Invalid title")
+        }
+
+        val updated = store.getById(id) ?: return@post call.respond(HttpStatusCode.NotFound)
+        updated.title = newTitle
+        store.update(updated)
+
+        if (call.isHtmx()) {
+            val fragment = call.renderTemplate("tasks/_item.peb", mapOf("task" to updated))
+            val status = """<p id="status" hx-swap-oob="innerText">Updated "${updated.title}"</p>"""
+            return@post call.respondText(fragment + status, ContentType.Text.Html)
+        }
+
+        call.respondRedirect("/tasks")
+    }
+
+    // GET /tasks/{id}/view
+    get("/tasks/{id}/view") {
+        val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.NotFound)
+        val task = store.getById(id) ?: return@get call.respond(HttpStatusCode.NotFound)
+
+        val html = call.renderTemplate("tasks/_item.peb", mapOf("task" to task))
+        call.respondText(html, ContentType.Text.Html)
     }
 }
