@@ -9,7 +9,7 @@
 
 ## Summary
 - **Critical**: 0
-- **Serious**: 0
+- **Serious**: 1
 - **Moderate**: 0
 - **Minor**: 0
 - **Total**: 0 issues
@@ -22,7 +22,7 @@ None detected.
 ---
 
 ## Serious Issues
-None detected.
+Automatic Issue - Elements must meet minimum threshold colour contrast
 
 ---
 
