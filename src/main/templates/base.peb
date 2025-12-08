@@ -12,7 +12,7 @@
     button,
     button[type="submit"] {
       background-color: #0056b3;
-      color: #ffffff;
+      color: #ffffff; }
   </style>
 </head>
 <body>
