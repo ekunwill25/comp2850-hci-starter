@@ -15,7 +15,7 @@
 
 **Test method**: Use Chrome DevTools Color Picker or [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
 
-**Findings**: [List any contrast failures with ratios]
+**Findings**: Contrast ratio is 8.17:1
 
 ---
 
@@ -101,15 +101,15 @@
 
 **Test method**: NVDA on → add task → confirm "Task added" announced
 
-**Findings**: [Status messages announced?]
+**Findings**: Status messages are not being announced
 
 ---
 
 ## Summary
 
-**Total checks**: 10
-**Passed**: [e.g., 7]
-**Failed**: [e.g., 3]
+**Total checks**: 9
+**Passed**: 8
+**Failed**: 1
 
 **Critical failures** (Level A):
 - [List Level A failures - these MUST be fixed]
