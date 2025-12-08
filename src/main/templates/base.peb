@@ -9,15 +9,23 @@
   <style>
     .visually-hidden{ position:absolute!important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap; }
     .error{ color:#c00; }
-      button,
+    button,
     button[type="submit"] {
       background-color: #0056b3;
-      color: #ffffff; }
+      color: #ffffff;
+    }
   </style>
 </head>
 <body>
   <main class="container">
-    <p id="status" role="status" aria-live="polite" class="visually-hidden"></p>
+    <p
+      id="status"
+      role="status"
+      aria-live="assertive"
+      aria-atomic="true"
+      style="margin-bottom: 1rem;"
+    ></p>
+
     {% block content %}{% endblock %}
   </main>
 </body>
