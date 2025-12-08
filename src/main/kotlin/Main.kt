@@ -42,15 +42,7 @@ fun Application.configureLogging() {
     }
 }
 
-/**
- * Configure Pebble templating engine.
- * Templates are in src/main/resources/templates/
- *
- * **Template conventions**:
- * - Partials start with underscore: `_list.peb`, `_item.peb`
- * - Layouts in `_layout/` subdirectory
- * - Full pages in root or feature subdirectories
- */
+
 fun Application.configureTemplating() {
     val pebbleEngine =
         PebbleEngine
@@ -74,9 +66,7 @@ fun Application.configureTemplating() {
     attributes.put(PebbleEngineKey, pebbleEngine)
 }
 
-/**
- * AttributeKey for storing Pebble engine instance.
- */
+
 val PebbleEngineKey = AttributeKey<PebbleEngine>("PebbleEngine")
 
 /**
