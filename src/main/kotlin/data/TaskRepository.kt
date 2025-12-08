@@ -53,4 +53,8 @@ object TaskRepository {
     private fun persist() {
         file.writeText("id,title\n" + tasks.joinToString("\n") { "${it.id},${it.title}" })
     }
+
+    // ❌ removed duplicate get()
+    // ❌ removed duplicate update()
+
 }

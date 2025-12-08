@@ -6,5 +6,5 @@
 COMPILATION-ISSUES.md
 /data/tasks.csv
 /data/metrics.csv
-/wk*/research/*notes.md  # Interview notes with pseudonyms
+/wk*/research/*notes.md
 *.log

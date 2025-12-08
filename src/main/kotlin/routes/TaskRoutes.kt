@@ -12,45 +12,58 @@ fun ApplicationCall.isHtmx(): Boolean =
     request.headers["HX-Request"]?.equals("true", ignoreCase = true) == true
 
 fun Route.taskRoutes() {
+
     get("/tasks") {
-    val html = call.renderTemplate(
-        "tasks/index.peb",
-        mapOf(
-            "title" to "Tasks",
-            "tasks" to TaskRepository.all(),
-            "editingId" to 0,
-            "errorMessage" to ""
+        val html = call.renderTemplate(
+            "tasks/index.peb",
+            mapOf(
+                "title" to "Tasks",
+                "tasks" to TaskRepository.all(),
+                "editingId" to 0,
+                "errorMessage" to ""
+            )
         )
-    )
-    call.respondText(html, ContentType.Text.Html)
-}
+        call.respondText(html, ContentType.Text.Html)
+    }
 
     post("/tasks") {
-    val title = call.receiveParameters()["title"].orEmpty().trim()
+        val title = call.receiveParameters()["title"].orEmpty().trim()
 
-    if (title.isBlank()) {
-        if (call.isHtmx()) {
-            val error = """<div id="status" hx-swap-oob="true" role="alert" aria-live="assertive">Title is required.</div>"""
-            return@post call.respondText(error, ContentType.Text.Html, HttpStatusCode.BadRequest)
-        } else {
-            return@post call.respondRedirect("/tasks?error=required")
+        // Handle empty title
+        if (title.isBlank()) {
+            if (call.isHtmx()) {
+                // Just send an out-of-band status message
+                val status = """<div id="status" hx-swap-oob="true">Title cannot be blank.</div>"""
+                return@post call.respondText(status, ContentType.Text.Html, HttpStatusCode.BadRequest)
+            } else {
+                // Re-render full page with error message
+                val html = call.renderTemplate(
+                    "tasks/index.peb",
+                    mapOf(
+                        "title" to "Tasks",
+                        "tasks" to TaskRepository.all(),
+                        "editingId" to 0,
+                        "errorMessage" to "Title cannot be blank."
+                    )
+                )
+                return@post call.respondText(html, ContentType.Text.Html, HttpStatusCode.BadRequest)
+            }
         }
+
+        // Title is OK → create task
+        val task = TaskRepository.add(title)
+
+        if (call.isHtmx()) {
+            val fragment = call.renderTemplate(
+                "tasks/_item.peb",
+                mapOf("task" to task)
+            )
+            val status = """<div id="status" hx-swap-oob="true">Task "${task.title}" added successfully.</div>"""
+            return@post call.respondText(fragment + status, ContentType.Text.Html, HttpStatusCode.Created)
+        }
+
+        call.respondRedirect("/tasks")
     }
-
-    val task = TaskRepository.add(title)
-
-    if (call.isHtmx()) {
-        // Use the template - NO "templates/" prefix
-        val fragment = call.renderTemplate(
-            "tasks/_item.peb",
-            mapOf("task" to task)
-        )
-        val status = """<div id="status" hx-swap-oob="true">Task "${task.title}" added successfully.</div>"""
-        return@post call.respondText(fragment + status, ContentType.Text.Html, HttpStatusCode.Created)
-    }
-
-    call.respondRedirect("/tasks")
-}
 
     post("/tasks/{id}/delete") {
         val id = call.parameters["id"]?.toIntOrNull()
@@ -64,93 +77,69 @@ fun Route.taskRoutes() {
         call.respondRedirect("/tasks")
     }
 
+    // GET /tasks/{id}/edit
     get("/tasks/{id}/edit") {
-        val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.NotFound)
-        val task = TaskRepository.get(id) ?: return@get call.respond(HttpStatusCode.NotFound)
-        val errorParam = call.request.queryParameters["error"]
+        val id = call.parameters["id"]?.toIntOrNull()
+        val task = id?.let { TaskRepository.get(it) }
 
-        val errorMessage = when (errorParam) {
-            "blank" -> "Title is required. Please enter at least one character."
-            else -> null
+        if (task == null) {
+            call.respond(HttpStatusCode.NotFound, "Task not found")
+            return@get
         }
 
         if (call.isHtmx()) {
-            val model: Map<String, Any> = if (errorMessage != null) {
-                mapOf("task" to task, "error" to errorMessage)
-            } else {
-                mapOf("task" to task, "error" to "")
-            }
-            val html = call.renderTemplate("tasks/_edit.peb", model)
+            val html = call.renderTemplate("tasks/_edit.peb", mapOf("task" to task))
             call.respondText(html, ContentType.Text.Html)
         } else {
-            val model: Map<String, Any> = if (errorMessage != null) {
+            val html = call.renderTemplate(
+                "tasks/index.peb",
                 mapOf(
-                    "title" to "Tasks",
+                    "title" to "Edit Task",
                     "tasks" to TaskRepository.all(),
-                    "editingId" to id,
-                    "errorMessage" to errorMessage
+                    "editingTaskId" to id
                 )
-            } else {
-                mapOf(
-                    "title" to "Tasks",
-                    "tasks" to TaskRepository.all(),
-                    "editingId" to id,
-                    "errorMessage" to ""
-                )
-            }
-            val html = call.renderTemplate("tasks/index.peb", model)
+            )
             call.respondText(html, ContentType.Text.Html)
         }
     }
 
+    // POST /tasks/{id}/edit
     post("/tasks/{id}/edit") {
-        val id = call.parameters["id"]?.toIntOrNull() ?: return@post call.respond(HttpStatusCode.NotFound)
-        val task = TaskRepository.get(id) ?: return@post call.respond(HttpStatusCode.NotFound)
+        val id = call.parameters["id"]?.toIntOrNull()
+        val newTitle = call.receiveParameters()["title"]?.trim()
 
-        val newTitle = call.receiveParameters()["title"].orEmpty().trim()
-
-        if (newTitle.isBlank()) {
-            if (call.isHtmx()) {
-                val html = call.renderTemplate(
-                    "tasks/_edit.peb",
-                    mapOf(
-                        "task" to task,
-                        "error" to "Title is required. Please enter at least one character."
-                    )
-                )
-                return@post call.respondText(html, ContentType.Text.Html, HttpStatusCode.BadRequest)
-            } else {
-                return@post call.respondRedirect("/tasks/${id}/edit?error=blank")
-            }
+        if (id == null || newTitle.isNullOrBlank()) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid input")
+            return@post
         }
 
-        val updatedTask = TaskRepository.update(id, newTitle)
-        if (updatedTask == null) {
-            return@post call.respond(HttpStatusCode.NotFound, "Task not found")
+        val updated = TaskRepository.update(id, newTitle)
+
+        if (updated == null) {
+            call.respond(HttpStatusCode.NotFound, "Task not found")
+            return@post
         }
 
         if (call.isHtmx()) {
-            val viewHtml = call.renderTemplate(
-                "tasks/_item.peb",
-                mapOf("task" to updatedTask)
-            )
-
-            val status = """<div id="status" hx-swap-oob="true">Task "${updatedTask.title}" updated successfully.</div>"""
-
-            return@post call.respondText(viewHtml + status, ContentType.Text.Html)
+            val item = call.renderTemplate("tasks/_item.peb", mapOf("task" to updated))
+            val status = """<div id="status" hx-swap-oob="true">Task updated to "${updated.title}".</div>"""
+            call.respondText(item + status, ContentType.Text.Html)
+        } else {
+            call.respondRedirect("/tasks")
         }
-
-        call.respondRedirect("/tasks")
     }
 
+    // GET /tasks/{id}/view
     get("/tasks/{id}/view") {
-        val id = call.parameters["id"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.NotFound)
-        val task = TaskRepository.get(id) ?: return@get call.respond(HttpStatusCode.NotFound)
+        val id = call.parameters["id"]?.toIntOrNull()
+        val task = id?.let { TaskRepository.get(it) }
 
-        val html = call.renderTemplate(
-            "tasks/_item.peb",
-            mapOf("task" to task)
-        )
+        if (task == null) {
+            call.respond(HttpStatusCode.NotFound)
+            return@get
+        }
+
+        val html = call.renderTemplate("tasks/_item.peb", mapOf("task" to task))
         call.respondText(html, ContentType.Text.Html)
     }
 }
