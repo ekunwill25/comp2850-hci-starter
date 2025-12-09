@@ -8,6 +8,7 @@ import io.ktor.server.routing.*
 import model.Task
 import storage.TaskStore
 import renderTemplate
+import isHtmxRequest     // <-- REQUIRED
 
 fun Route.taskRoutes(store: TaskStore = TaskStore()) {
 
@@ -41,28 +42,38 @@ fun Route.taskRoutes(store: TaskStore = TaskStore()) {
         val task = Task(title = title)
         store.add(task)
 
+        // return only fragment (HTMX)
         val fragment = call.renderTemplate("tasks/_item.peb", mapOf("task" to task))
         val status = """<p id="status" hx-swap-oob="innerText">Task "${task.title}" added</p>"""
 
         call.respondText(fragment + status, ContentType.Text.Html, HttpStatusCode.Created)
     }
 
-    // PUT /tasks/{id}
-    put("/tasks/{id}") {
-        val id = call.parameters["id"] ?: return@put call.respond(HttpStatusCode.BadRequest)
-        val params = call.receiveParameters()
-        val title = params["title"].orEmpty().trim()
+    // GET /tasks/{id}/edit  → return edit form
+    get("/tasks/{id}/edit") {
+        val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.NotFound)
+        val task = store.getById(id) ?: return@get call.respond(HttpStatusCode.NotFound)
 
-        if (title.isBlank()) {
-            return@put call.respond(HttpStatusCode.BadRequest, "Title cannot be blank")
+        val html = call.renderTemplate("tasks/_edit.peb", mapOf("task" to task))
+        call.respondText(html, ContentType.Text.Html)
+    }
+
+    // POST /tasks/{id}/edit → update and return updated item
+    post("/tasks/{id}/edit") {
+        val id = call.parameters["id"] ?: return@post call.respond(HttpStatusCode.BadRequest)
+        val title = call.receiveParameters()["title"].orEmpty().trim()
+
+        val updated = store.update(id, title)
+            ?: return@post call.respond(HttpStatusCode.NotFound)
+
+        // If request came from HTMX, return only the <li> partial
+        if (call.isHtmxRequest()) {
+            val fragment = call.renderTemplate("tasks/_item.peb", mapOf("task" to updated))
+            return@post call.respondText(fragment, ContentType.Text.Html)
         }
 
-        val task = store.update(id, title)
-            ?: return@put call.respond(HttpStatusCode.NotFound)
-
-        val fragment = call.renderTemplate("tasks/_item.peb", mapOf("task" to task))
-
-        call.respondText(fragment, ContentType.Text.Html)
+        // fallback full redirect
+        call.respondRedirect("/tasks")
     }
 
     // DELETE /tasks/{id}
@@ -75,15 +86,5 @@ fun Route.taskRoutes(store: TaskStore = TaskStore()) {
             """<p id="status" hx-swap-oob="innerText">Task deleted.</p>""",
             ContentType.Text.Html
         )
-    }
-
-    // GET /tasks/{id}/edit
-    get("/tasks/{id}/edit") {
-        val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.NotFound)
-        val task = store.getById(id) ?: return@get call.respond(HttpStatusCode.NotFound)
-
-        val html = call.renderTemplate("tasks/_edit.peb", mapOf("task" to task))
-
-        call.respondText(html, ContentType.Text.Html)
     }
 }

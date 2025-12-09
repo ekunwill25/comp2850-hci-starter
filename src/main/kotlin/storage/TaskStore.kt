@@ -22,8 +22,14 @@ class TaskStore {
     }
 
     fun update(id: String, title: String): Task? {
-        val task = tasks[id] ?: return null
-        task.title = title
-        return task
+        val old = tasks[id] ?: return null
+
+        val updated = old.copy(
+            title = title
+        )
+
+        tasks[id] = updated
+        return updated
     }
 }
+
