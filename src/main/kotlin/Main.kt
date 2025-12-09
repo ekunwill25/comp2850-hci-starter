@@ -174,3 +174,18 @@ fun Application.configureRouting() {
         taskRoutes()
     }
 }
+
+/**
+ * Render Pebble template to HTML string.
+ * Extension function for cleaner template rendering in routes.
+ */
+suspend fun ApplicationCall.renderTemplate(
+    templateName: String,
+    context: Map<String, Any> = emptyMap()
+): String {
+    val engine = application.attributes[PebbleEngineKey]
+    val writer = StringWriter()
+    val template = engine.getTemplate(templateName)
+    template.evaluate(writer, context)
+    return writer.toString()
+}

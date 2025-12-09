@@ -118,4 +118,26 @@ fun Route.taskRoutes(store: TaskStore = TaskStore()) {
         val html = call.renderTemplate("tasks/_item.peb", mapOf("task" to task))
         call.respondText(html, ContentType.Text.Html)
     }
+
+    get("/tasks") {
+        val query = call.request.queryParameters["q"].orEmpty()
+        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+        val tasks = store.search(query)
+        val data = Page.paginate(tasks.map { it.toPebbleContext() }, page, pageSize = 10)
+        val model = mapOf("title" to "Tasks", "page" to data, "query" to query)
+        val html = call.renderTemplate("tasks/index.peb", model)
+        call.respondText(html, ContentType.Text.Html)
+    }
+
+    get("/tasks/fragment") {
+        val query = call.request.queryParameters["q"].orEmpty()
+        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+        val tasks = store.search(query)
+        val data = Page.paginate(tasks.map { it.toPebbleContext() }, page, pageSize = 10)
+        val list = call.renderTemplate("tasks/_list.peb", mapOf("page" to data, "query" to query))
+        val pager = call.renderTemplate("tasks/_pager.peb", mapOf("page" to data, "query" to query))
+        val status = """<div id="status" hx-swap-oob="true">Found ${data.totalItems} tasks.</div>"""
+        call.respondText(list + pager + status, ContentType.Text.Html)
+    }
+
 }
