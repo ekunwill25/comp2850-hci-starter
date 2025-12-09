@@ -65,7 +65,7 @@ suspend fun ApplicationCall.renderTemplate(
 ): String {
     val engine = application.attributes[PebbleEngineKey]
     val writer = StringWriter()
-    val template = engine.getTemplate("templates/$templateName")
+    val template = engine.getTemplate(templateName)
 
     val sessionData = sessions.get<SessionData>()
     val enrichedContext =
