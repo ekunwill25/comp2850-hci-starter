@@ -1,5 +1,9 @@
-package utils
+package utils  // CRITICAL: must be utils, not data!
 
+/**
+ * Generic pagination container.
+ * Wraps list items with page metadata.
+ */
 data class Page<T>(
     val items: List<T>,
     val currentPage: Int,
@@ -14,8 +18,9 @@ data class Page<T>(
 
     companion object {
         /**
-         * Paginate a list of items.
-         * Usage: Page.paginate(allTasks, currentPage = 1, pageSize = 10)
+         * Create paginated subset of items.
+         * REQUIRED: This is the function called in routes!
+         * Usage: Page.paginate(allTasks, currentPage = page, pageSize = 10)
          */
         fun <T> paginate(
             items: List<T>,
@@ -25,7 +30,7 @@ data class Page<T>(
             val totalItems = items.size
             val totalPages = if (totalItems == 0) 1 else (totalItems + pageSize - 1) / pageSize
 
-            // Clamp to valid range [1..totalPages]
+            // Clamp page to valid range [1..totalPages]
             val validPage = currentPage.coerceIn(1, totalPages)
 
             // Calculate slice bounds
