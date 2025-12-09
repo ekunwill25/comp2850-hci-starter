@@ -1,30 +1,22 @@
-{# Pagination navigation with dual-mode support (HTMX + no-JS) #}
 <nav aria-label="Pagination">
   <ul class="pagination">
-    {% if page.hasPrevious %}
+    {% if page.currentPage > 1 %}
       <li>
-        <a href="/tasks?q={{ q|default('') }}&page={{ page.previousPage }}"
-           hx-get="/tasks/fragment?q={{ q|default('') }}&page={{ page.previousPage }}"
+        <a href="/tasks?q={{ query|default('') }}&page={{ page.currentPage - 1 }}"
+           hx-get="/tasks/fragment?q={{ query|default('') }}&page={{ page.currentPage - 1 }}"
            hx-target="#task-area"
-           hx-push-url="true">
-          Previous
-        </a>
+           hx-push-url="true">Previous</a>
       </li>
     {% endif %}
-
-    <li aria-current="page">
-      Page {{ page.currentPage }} of {{ page.totalPages }}
-    </li>
-
-    {% if page.hasNext %}
+    <li aria-current="page">Page {{ page.currentPage }} of {{ page.totalPages }}</li>
+    {% if page.currentPage < page.totalPages %}
       <li>
-        <a href="/tasks?q={{ q|default('') }}&page={{ page.nextPage }}"
-           hx-get="/tasks/fragment?q={{ q|default('') }}&page={{ page.nextPage }}"
+        <a href="/tasks?q={{ query|default('') }}&page={{ page.currentPage + 1 }}"
+           hx-get="/tasks/fragment?q={{ query|default('') }}&page={{ page.currentPage + 1 }}"
            hx-target="#task-area"
-           hx-push-url="true">
-          Next
-        </a>
+           hx-push-url="true">Next</a>
       </li>
     {% endif %}
   </ul>
 </nav>
+

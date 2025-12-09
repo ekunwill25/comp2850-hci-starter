@@ -3,8 +3,23 @@ package data
 import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 
-data class Task(val id: Int, var title: String)
+/**
+ * Simple task data model for Week 7.
+ *
+ * **Week 7**: Editable title field
+ * **Week 8 evolution**: Add `createdAt` timestamp for sorting
+ */
+data class Task(
+    val id: Int,
+    var title: String,
+)
 
+/**
+ * In-memory repository with CSV persistence.
+ *
+ * **Week 7**: Added find() and update() methods for inline edit
+ * **Week 10 evolution**: Refactor to class with UUID for production-readiness
+ */
 object TaskRepository {
     private val file = File("data/tasks.csv")
     private val tasks = mutableListOf<Task>()
@@ -26,15 +41,6 @@ object TaskRepository {
         }
     }
 
-    fun get(id: Int): Task? = tasks.find { it.id == id }
-
-    fun update(id: Int, newTitle: String): Task? {
-        val task = tasks.find { it.id == id } ?: return null
-        task.title = newTitle
-        persist()
-        return task
-    }
-
     fun all(): List<Task> = tasks.toList()
 
     fun add(title: String): Task {
@@ -50,11 +56,22 @@ object TaskRepository {
         return removed
     }
 
+    fun find(id: Int): Task? = tasks.find { it.id == id }
+
+    fun update(task: Task) {
+        tasks.find { it.id == task.id }?.let { it.title = task.title }
+        persist()
+    }
+
+    /**
+     * Week 8: Search tasks by title
+     */
+    fun search(query: String): List<Task> {
+        if (query.isBlank()) return all()
+        return tasks.filter { it.title.contains(query, ignoreCase = true) }.toList()
+    }
+
     private fun persist() {
         file.writeText("id,title\n" + tasks.joinToString("\n") { "${it.id},${it.title}" })
     }
-
-    // ❌ removed duplicate get()
-    // ❌ removed duplicate update()
-
 }
