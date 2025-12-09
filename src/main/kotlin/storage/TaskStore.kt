@@ -1,28 +1,29 @@
 package storage
 
 import model.Task
+import java.util.concurrent.ConcurrentHashMap
 
 class TaskStore {
-    private val tasks = mutableListOf<Task>()
 
-    fun getAll(): List<Task> = tasks.toList()
-    fun getById(id: String): Task? = tasks.find { it.id == id }
-    fun add(task: Task) { tasks.add(task) }
-    fun update(task: Task): Boolean {
-        val index = tasks.indexOfFirst { it.id == task.id }
-        return if (index != -1) { tasks[index] = task; true } else false
+    private val tasks = ConcurrentHashMap<String, Task>()
+
+    fun add(task: Task) {
+        tasks[task.id] = task
     }
-    fun delete(id: String): Boolean = tasks.removeIf { it.id == id }
 
-    /**
-     * Search tasks by title (case-insensitive).
-     * Pagination happens in routes layer.
-     */
-    fun search(query: String): List<Task> {
-        if (query.isBlank()) return getAll()
-        val normalizedQuery = query.trim().lowercase()
-        return getAll().filter { task ->
-            task.title.lowercase().contains(normalizedQuery)
-        }
+    fun getAll(): List<Task> =
+        tasks.values.toList()
+
+    fun getById(id: String): Task? =
+        tasks[id]
+
+    fun delete(id: String) {
+        tasks.remove(id)
+    }
+
+    fun update(id: String, title: String): Task? {
+        val task = tasks[id] ?: return null
+        task.title = title
+        return task
     }
 }

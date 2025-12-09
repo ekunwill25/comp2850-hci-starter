@@ -5,10 +5,9 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import storage.TaskStore
 import model.Task
-import renderTemplate   // OK
-import isHtmxRequest   // use YOUR function name
+import storage.TaskStore
+import renderTemplate
 
 fun Route.taskRoutes(store: TaskStore = TaskStore()) {
 
@@ -42,14 +41,28 @@ fun Route.taskRoutes(store: TaskStore = TaskStore()) {
         val task = Task(title = title)
         store.add(task)
 
-        // HTMX partial
-        if (call.isHtmxRequest()) {
-            val fragment = call.renderTemplate("tasks/_item.peb", mapOf("task" to task))
-            val status = """<p id="status" hx-swap-oob="innerText">Task "${task.title}" added</p>"""
-            return@post call.respondText(fragment + status, ContentType.Text.Html, HttpStatusCode.Created)
+        val fragment = call.renderTemplate("tasks/_item.peb", mapOf("task" to task))
+        val status = """<p id="status" hx-swap-oob="innerText">Task "${task.title}" added</p>"""
+
+        call.respondText(fragment + status, ContentType.Text.Html, HttpStatusCode.Created)
+    }
+
+    // PUT /tasks/{id}
+    put("/tasks/{id}") {
+        val id = call.parameters["id"] ?: return@put call.respond(HttpStatusCode.BadRequest)
+        val params = call.receiveParameters()
+        val title = params["title"].orEmpty().trim()
+
+        if (title.isBlank()) {
+            return@put call.respond(HttpStatusCode.BadRequest, "Title cannot be blank")
         }
 
-        call.respondRedirect("/tasks")
+        val task = store.update(id, title)
+            ?: return@put call.respond(HttpStatusCode.NotFound)
+
+        val fragment = call.renderTemplate("tasks/_item.peb", mapOf("task" to task))
+
+        call.respondText(fragment, ContentType.Text.Html)
     }
 
     // DELETE /tasks/{id}
@@ -69,19 +82,8 @@ fun Route.taskRoutes(store: TaskStore = TaskStore()) {
         val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.NotFound)
         val task = store.getById(id) ?: return@get call.respond(HttpStatusCode.NotFound)
 
-        if (call.isHtmxRequest()) {
-            val html = call.renderTemplate("tasks/_edit.peb", mapOf("task" to task))
-            return@get call.respondText(html, ContentType.Text.Html)
-        }
+        val html = call.renderTemplate("tasks/_edit.peb", mapOf("task" to task))
 
-        val html = call.renderTemplate(
-            "tasks/index.peb",
-            mapOf(
-                "title" to "Edit Task",
-                "tasks" to store.getAll(),
-                "editingId" to id
-            )
-        )
         call.respondText(html, ContentType.Text.Html)
     }
 }
