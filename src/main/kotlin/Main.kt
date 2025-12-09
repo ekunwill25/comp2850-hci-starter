@@ -17,7 +17,7 @@ import io.ktor.util.*
 
 fun main() {
     val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
-    val host = "0.0.0.0" // Required for Codespaces
+    val host = "0.0.0.0"
 
     embeddedServer(Netty, port = port, host = host) {
         configureLogging()
@@ -27,12 +27,8 @@ fun main() {
     }.start(wait = true)
 }
 
-/**
- * Configure request logging for development and debugging.
- */
 fun Application.configureLogging() {
     install(CallLogging) {
-        // Log format: METHOD /path - status (duration ms)
         format { call ->
             val status = call.response.status()
             val method = call.request.httpMethod.value
@@ -42,56 +38,27 @@ fun Application.configureLogging() {
     }
 }
 
-/**
- * Configure Pebble templating engine.
- * Templates are in src/main/resources/templates/
- *
- * **Template conventions**:
- * - Partials start with underscore: `_list.peb`, `_item.peb`
- * - Layouts in `_layout/` subdirectory
- * - Full pages in root or feature subdirectories
- */
 fun Application.configureTemplating() {
     val pebbleEngine =
         PebbleEngine
             .Builder()
             .loader(io.pebbletemplates.pebble.loader.ClasspathLoader())
-            .autoEscaping(true) // XSS protection via auto-escaping
-            .cacheActive(false) // Disable cache in dev for hot reload
-            .strictVariables(false) // Allow undefined variables (fail gracefully)
+            .autoEscaping(true)
+            .cacheActive(false)
+            .strictVariables(false)
             .build()
 
     environment.monitor.subscribe(ApplicationStarted) {
-        log.info("✓ Pebble templates loaded from resources/templates/")
-        log.info("✓ Server running on configured port")
+        log.info("✓ Pebble templates loaded")
+        log.info("✓ Server running")
     }
 
-    // Make Pebble available to all routes
     attributes.put(PebbleEngineKey, pebbleEngine)
 }
 
-/**
- * AttributeKey for storing Pebble engine instance.
- */
 val PebbleEngineKey = AttributeKey<PebbleEngine>("PebbleEngine")
 
-/**
- * Render a Pebble template to HTML string.
- *
- * **Usage**:
- * ```kotlin
- * val html = call.renderTemplate("tasks/index.peb", mapOf("tasks" to taskList))
- * call.respondText(html, ContentType.Text.Html)
- * ```
- *
- * **Context enrichment**:
- * - Automatically adds `sessionId` from session
- * - Automatically adds `isHtmx` flag (true if HX-Request header present)
- *
- * @param templateName Template path relative to resources/templates/
- * @param context Data to pass to template (map of variable names to values)
- * @return Rendered HTML string
- */
+
 suspend fun ApplicationCall.renderTemplate(
     templateName: String,
     context: Map<String, Any> = emptyMap(),
@@ -100,7 +67,6 @@ suspend fun ApplicationCall.renderTemplate(
     val writer = StringWriter()
     val template = engine.getTemplate("templates/$templateName")
 
-    // Add global context available to all templates
     val sessionData = sessions.get<SessionData>()
     val enrichedContext =
         context +
@@ -113,79 +79,25 @@ suspend fun ApplicationCall.renderTemplate(
     return writer.toString()
 }
 
-/**
- * Check if request is from HTMX (progressive enhancement mode).
- *
- * **HTMX detection**:
- * - HTMX adds `HX-Request: true` header to all AJAX requests
- * - Use this to return fragments vs full pages
- *
- * **Pattern**:
- * ```kotlin
- * if (call.isHtmxRequest()) {
- *     // Return partial HTML fragment
- *     call.respondText(render("tasks/_list.peb"))
- * } else {
- *     // Traditional redirect (POST-Redirect-GET)
- *     call.respondRedirect("/tasks")
- * }
- * ```
- */
-fun ApplicationCall.isHtmxRequest(): Boolean = request.headers["HX-Request"] == "true"
 
-/**
- * Configure session handling (privacy-safe anonymous IDs).
- *
- * **Privacy notes**:
- * - Session IDs are random, anonymous (no PII)
- * - Used for metrics correlation only
- * - Cookie is HttpOnly, SameSite=Strict
- * - No tracking across devices/browsers
- */
+fun ApplicationCall.isHtmxRequest(): Boolean =
+    request.headers["HX-Request"] == "true"
+
+
 fun Application.configureSessions() {
     install(Sessions) {
         cookie<SessionData>("COMP2850_SESSION") {
             cookie.path = "/"
             cookie.httpOnly = true
             cookie.extensions["SameSite"] = "Strict"
-            // No maxAge = session cookie (deleted when browser closes)
         }
     }
 }
 
-/**
- * Configure application routing.
- *
- * **Route organization**:
- * - Static files: `/static/...` (CSS, JS, HTMX)
- * - Health check: `/health`
- * - Task CRUD: `/tasks`, `/tasks/{id}`, etc.
- */
 fun Application.configureRouting() {
     routing {
-        // Static files (CSS, JS, HTMX library)
         staticResources("/static", "static")
-
-        // Health check endpoint (for monitoring)
         configureHealthCheck()
-
-        // Task management routes (main feature)
-        // TODO: Week 6 Lab 1 - Implement taskRoutes()
         taskRoutes()
     }
-}
-
-/**
- * Render Pebble template to HTML string.
- * Extension function for cleaner template rendering in routes.
- */
-suspend fun ApplicationCall.renderTemplate(
-    templateName: String,
-    context: Map<String, Any> = emptyMap()
-): String {
-    val engine = application.attributes[PebbleEngineKey]
-    val writer = StringWriter()
-    val template = engine.getTemplate(templateName)
-    template.evaluate(writer, context)
-    return writer.toString()
 }
