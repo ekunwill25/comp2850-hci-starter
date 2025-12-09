@@ -7,6 +7,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import storage.TaskStore
 import model.Task
+import renderTemplate   // OK
+import isHtmxRequest   // use YOUR function name
 
 fun Route.taskRoutes(store: TaskStore = TaskStore()) {
 
@@ -80,38 +82,6 @@ fun Route.taskRoutes(store: TaskStore = TaskStore()) {
                 "editingId" to id
             )
         )
-        call.respondText(html, ContentType.Text.Html)
-    }
-
-    // POST /tasks/{id}/edit   🔥 FIXED BLOCK HERE
-    post("/tasks/{id}/edit") {
-        val id = call.parameters["id"] ?: return@post call.respond(HttpStatusCode.BadRequest)
-        val newTitle = call.receiveParameters()["title"]?.trim()
-
-        if (newTitle.isNullOrBlank()) {
-            return@post call.respond(HttpStatusCode.BadRequest, "Invalid title")
-        }
-
-        val existing = store.getById(id) ?: return@post call.respond(HttpStatusCode.NotFound)
-
-        val updated = existing.copy(title = newTitle)
-        store.update(updated)
-
-        if (call.isHtmxRequest()) {
-            val fragment = call.renderTemplate("tasks/_item.peb", mapOf("task" to updated))
-            val status = """<p id="status" hx-swap-oob="innerText">Updated "${updated.title}"</p>"""
-            return@post call.respondText(fragment + status, ContentType.Text.Html)
-        }
-
-        call.respondRedirect("/tasks")
-    }
-
-    // GET /tasks/{id}/view
-    get("/tasks/{id}/view") {
-        val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.NotFound)
-        val task = store.getById(id) ?: return@get call.respond(HttpStatusCode.NotFound)
-
-        val html = call.renderTemplate("tasks/_item.peb", mapOf("task" to task))
         call.respondText(html, ContentType.Text.Html)
     }
 }
