@@ -8,28 +8,20 @@ import io.ktor.server.routing.*
 import storage.TaskStore
 import model.Task
 
-// add these 3 imports 👇
-import renderTemplate
-import isHtmxRequest
-import utils.Page   // you need this because you call Page.paginate()
-
 fun Route.taskRoutes(store: TaskStore = TaskStore()) {
 
-    // GET /tasks — list + search + pagination
+    // GET /tasks
     get("/tasks") {
-        val query = call.request.queryParameters["q"].orEmpty()
-        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+        val tasks = store.getAll()
 
-        val tasks = store.search(query)
-        val data = Page.paginate(tasks.map { it.toPebbleContext() }, page, pageSize = 10)
-
-        val model = mapOf(
-            "title" to "Tasks",
-            "page" to data,
-            "query" to query
+        val html = call.renderTemplate(
+            "tasks/index.peb",
+            mapOf(
+                "title" to "Tasks",
+                "tasks" to tasks
+            )
         )
 
-        val html = call.renderTemplate("tasks/index.peb", model)
         call.respondText(html, ContentType.Text.Html)
     }
 
@@ -48,6 +40,7 @@ fun Route.taskRoutes(store: TaskStore = TaskStore()) {
         val task = Task(title = title)
         store.add(task)
 
+        // HTMX partial
         if (call.isHtmxRequest()) {
             val fragment = call.renderTemplate("tasks/_item.peb", mapOf("task" to task))
             val status = """<p id="status" hx-swap-oob="innerText">Task "${task.title}" added</p>"""
@@ -60,6 +53,7 @@ fun Route.taskRoutes(store: TaskStore = TaskStore()) {
     // DELETE /tasks/{id}
     delete("/tasks/{id}") {
         val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
+
         store.delete(id)
 
         call.respondText(
@@ -83,13 +77,13 @@ fun Route.taskRoutes(store: TaskStore = TaskStore()) {
             mapOf(
                 "title" to "Edit Task",
                 "tasks" to store.getAll(),
-                "editingId" to id,
+                "editingId" to id
             )
         )
         call.respondText(html, ContentType.Text.Html)
     }
 
-    // POST /tasks/{id}/edit
+    // POST /tasks/{id}/edit   🔥 FIXED BLOCK HERE
     post("/tasks/{id}/edit") {
         val id = call.parameters["id"] ?: return@post call.respond(HttpStatusCode.BadRequest)
         val newTitle = call.receiveParameters()["title"]?.trim()
@@ -98,13 +92,14 @@ fun Route.taskRoutes(store: TaskStore = TaskStore()) {
             return@post call.respond(HttpStatusCode.BadRequest, "Invalid title")
         }
 
-        val task = store.getById(id) ?: return@post call.respond(HttpStatusCode.NotFound)
-        task.title = newTitle
-        store.update(task)
+        val existing = store.getById(id) ?: return@post call.respond(HttpStatusCode.NotFound)
+
+        val updated = existing.copy(title = newTitle)
+        store.update(updated)
 
         if (call.isHtmxRequest()) {
-            val fragment = call.renderTemplate("tasks/_item.peb", mapOf("task" to task))
-            val status = """<p id="status" hx-swap-oob="innerText">Updated "${task.title}"</p>"""
+            val fragment = call.renderTemplate("tasks/_item.peb", mapOf("task" to updated))
+            val status = """<p id="status" hx-swap-oob="innerText">Updated "${updated.title}"</p>"""
             return@post call.respondText(fragment + status, ContentType.Text.Html)
         }
 
@@ -115,22 +110,8 @@ fun Route.taskRoutes(store: TaskStore = TaskStore()) {
     get("/tasks/{id}/view") {
         val id = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.NotFound)
         val task = store.getById(id) ?: return@get call.respond(HttpStatusCode.NotFound)
+
         val html = call.renderTemplate("tasks/_item.peb", mapOf("task" to task))
         call.respondText(html, ContentType.Text.Html)
-    }
-
-    // fragment route
-    get("/tasks/fragment") {
-        val query = call.request.queryParameters["q"].orEmpty()
-        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
-        val tasks = store.search(query)
-
-        val data = Page.paginate(tasks.map { it.toPebbleContext() }, page, pageSize = 10)
-
-        val list = call.renderTemplate("tasks/_list.peb", mapOf("page" to data, "query" to query))
-        val pager = call.renderTemplate("tasks/_pager.peb", mapOf("page" to data, "query" to query))
-        val status = """<div id="status" hx-swap-oob="true">Found ${data.totalItems} tasks.</div>"""
-
-        call.respondText(list + pager + status, ContentType.Text.Html)
     }
 }
