@@ -39,19 +39,18 @@ fun Application.configureLogging() {
 }
 
 fun Application.configureTemplating() {
+    val loader = io.pebbletemplates.pebble.loader.ClasspathLoader().apply {
+        prefix = "templates"
+    }
+
     val pebbleEngine =
         PebbleEngine
             .Builder()
-            .loader(io.pebbletemplates.pebble.loader.ClasspathLoader())
+            .loader(loader)
             .autoEscaping(true)
             .cacheActive(false)
             .strictVariables(false)
             .build()
-
-    environment.monitor.subscribe(ApplicationStarted) {
-        log.info("✓ Pebble templates loaded")
-        log.info("✓ Server running")
-    }
 
     attributes.put(PebbleEngineKey, pebbleEngine)
 }
@@ -65,7 +64,10 @@ suspend fun ApplicationCall.renderTemplate(
 ): String {
     val engine = application.attributes[PebbleEngineKey]
     val writer = StringWriter()
-    val template = engine.getTemplate(templateName)
+    val normalized = templateName.removePrefix("templates/")
+    val template = engine.getTemplate(normalized)
+
+
 
     val sessionData = sessions.get<SessionData>()
     val enrichedContext =
@@ -98,6 +100,9 @@ fun Application.configureRouting() {
     routing {
         staticResources("/static", "static")
         configureHealthCheck()
+        get("/") {
+            call.respondRedirect("/tasks")
+        }
         taskRoutes()
     }
 }
