@@ -17,120 +17,93 @@
 ## Task 1 (T1): [Task Title]
 
 ### Scenario
-> [Provide context for the task]
->
-> Example: "You need to add a new task for your coursework deadline."
+> You are organising your coursework and need to quickly add a new reminder to your task list.
 
 ### Instructions (read to participant)
-> "[Specific instruction]"
->
-> Example: "Add a task with the title 'COMP2850 lab report' to your task list."
+> "Add a new task titled ‘COMP2850 lab report’ to your list."
 
 ### Success Criteria
-- [ ] [Observable outcome 1]
-- [ ] [Observable outcome 2]
+- [ ] New task appears in list
+- [ ] Title matches exactly “COMP2850 lab report”
+- [ ] No validation errors occur
 
-Example:
-- [ ] Task appears in the task list
-- [ ] Task title matches "COMP2850 lab report"
-- [ ] No validation errors occurred
 
 ### Expected Duration
-**Target**: < [X] seconds
+**Target**: < [10] seconds
 
 ### Known Risks
-- [Potential issue 1, e.g., "Blank submission triggers validation error"]
-- [Potential issue 2, e.g., "Focus not moved to error message"]
+- Blank submission may trigger validation error
+- Status message may not announce correctly for screen readers
 
 ---
 
 ## Task 2 (T2): [Task Title]
 
 ### Scenario
-> [Provide context for the task]
->
-> Example: "You need to find all tasks related to your Computer Science module."
+> You want to quickly find all coursework-related tasks in a long task list.
+
 
 ### Instructions (read to participant)
-> "[Specific instruction]"
->
-> Example: "Use the filter to show only tasks containing the word 'COMP'."
+> “Filter the list so that it only shows tasks containing the word ‘COMP’.”
+
 
 ### Success Criteria
-- [ ] [Observable outcome 1]
-- [ ] [Observable outcome 2]
+- [ ] Filter field contains “COMP”
+- [ ] Only matching tasks remain visible
+- [ ] Filter result is apparent visually and/or via announcement
 
-Example:
-- [ ] Filter input contains "COMP"
-- [ ] Task list shows only matching tasks
-- [ ] Result count is announced (for SR users)
 
 ### Expected Duration
-**Target**: < [X] seconds
+**Target**: < [15] seconds
 
 ### Known Risks
-- [Potential issue 1, e.g., "Auto-filter not obvious (participant expects button)"]
-- [Potential issue 2, e.g., "Status announcement missing for no-JS mode"]
+- Auto-filter behaviour may not be obvious
+- No-JS mode requires full reload, may confuse participants
 
 ---
 
 ## Task 3 (T3): [Task Title]
 
 ### Scenario
-> [Provide context for the task]
->
-> Example: "You notice a typo in one of your tasks and need to correct it."
+> You notice a typo in a task and want to correct it so your list stays accurate.
+
 
 ### Instructions (read to participant)
-> "[Specific instruction]"
->
-> Example: "Edit the task titled '[example task]' and change it to '[corrected title]'."
+> “Edit the task you added earlier and change its title to ‘COMP2850 final lab report’.”
 
 ### Success Criteria
-- [ ] [Observable outcome 1]
-- [ ] [Observable outcome 2]
-
-Example:
-- [ ] Edit mode activated (form appears)
-- [ ] Task title updated successfully
-- [ ] Changes reflected in task list
+- [ ] Edit form opens successfully
+- [ ] Title updates to the new value
+- [ ] Updated task appears in the list
 
 ### Expected Duration
-**Target**: < [X] seconds
+**Target**: < [20] seconds
 
 ### Known Risks
-- [Potential issue 1, e.g., "Inline edit form not keyboard-accessible"]
-- [Potential issue 2, e.g., "Cancel button doesn't restore original value"]
+- Edit icon may not be clearly identifiable
+- Inline form may pose challenges for keyboard/SR access
 
 ---
 
 ## Task 4 (T4): [Task Title]
 
 ### Scenario
-> [Provide context for the task]
->
-> Example: "You've completed a task and want to remove it from your list."
+> You have finished a task and want to remove it to keep your list tidy.
 
 ### Instructions (read to participant)
-> "[Specific instruction]"
->
-> Example: "Delete the task titled '[example task]'."
+> “Delete the task titled ‘COMP2850 final lab report’.”
 
 ### Success Criteria
-- [ ] [Observable outcome 1]
-- [ ] [Observable outcome 2]
-
-Example:
-- [ ] Confirmation dialog appears (if implemented)
-- [ ] Task is removed from the list
-- [ ] Deletion confirmed visually
+- [ ] Confirmation step appears (HTMX JS mode)
+- [ ] Task disappears from list
+- [ ] Visual cue confirms success
 
 ### Expected Duration
-**Target**: < [X] seconds
+**Target**: < [10] seconds
 
 ### Known Risks
-- [Potential issue 1, e.g., "No confirmation—accidental deletion possible"]
-- [Potential issue 2, e.g., "Delete button not keyboard-accessible"]
+- Delete action may occur instantly with no warning
+- Button may be hard to focus via keyboard
 
 ---
 

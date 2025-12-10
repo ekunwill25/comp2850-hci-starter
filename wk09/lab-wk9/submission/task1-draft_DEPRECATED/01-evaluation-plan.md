@@ -1,7 +1,7 @@
 # Task 1: Evaluation Plan
 
-**Student ID**: [Your student ID]
-**Date**: [Date]
+**Student ID**: 201843237
+**Date**: [10/12/2025]
 **Module**: COMP2850 HCI
 
 ---
@@ -9,24 +9,24 @@
 ## 1. Evaluation Objectives
 
 **What are you evaluating?**
-- [Brief description of the system/interface being evaluated]
-- [Key features under evaluation]
+- A task-management interface where users add, edit and delete simple text based tasks.
+- Core usability interactions including feedback messages, inline editing, and keyboard accessibility.
 
 **Why evaluate now?**
-- [Design questions you need answered]
-- [Decisions that depend on evaluation results]
+- To identify usability issues before submission and prioritise improvements based on user behaviour.
+- Design decisions about accessibility, messaging, and interaction flow depend on pilot feedback.
 
 ---
 
 ## 2. Link to Needs-Finding (LO2)
 
 **Connection to Week 6 job stories**:
-- [Reference 2-3 job stories from Week 6 Lab 2 that informed your evaluation tasks]
-- [Example: "Job story: 'When I need to track coursework deadlines, I want to quickly add tasks, so I don't forget important dates' → informed Task 3 (add task) design"]
+- Job Story: When I manage tasks quickly, I need fast interactions, so I don’t waste time.
+- Job Story: When updating tasks, I want simple editing, so I avoid confusion or errors.
 
 **How needs-finding shaped evaluation**:
-- [Explain how user needs identified in Week 6 influenced which features to prioritise for testing]
-- [Example: "Needs-finding revealed that participants value speed over visual polish, so we're measuring time-on-task as primary metric"]
+- Needs showed speed and simplicity matter most, so we tested fast CRUD interactions directly.
+- Filtering and batch management were lower priority, so excluded from this round.
 
 **Evidence trail**: Week 6 job stories → backlog items → features implemented → evaluation tasks
 
@@ -37,17 +37,17 @@
 **Method chosen**: Task-based usability testing
 
 **Rationale**:
-- [Why task-based testing is appropriate for your design questions]
-- [What alternative methods were considered and why rejected]
+- Realistic tasks best reveal interaction issues, where interviews by themselves, wouldn’t expose timing problems or barriers.
+- Expert evaluation was considered but rejected because peer observation provides more authentic usability evidence.
 
-**Target participants**: Peer students (n=4 minimum)
+**Target participants**: Peer students (n=5 minimum)
 
 ---
 
 ## 4. Success Criteria
 
 **Quantitative metrics**:
-- **Time-on-task**: Target < [X] seconds for Task 1, < [Y] seconds for Task 2, etc.
+- **Time-on-task**: Target < <10s add, <12s edit, <8s complete, <8s delete.
 - **Completion rate**: Target ≥ 80% (participants complete without critical errors)
 - **Error rate**: Target < 20% (validation errors, incorrect submissions)
 - **Confidence**: Target ≥ 4/5 average (post-task self-rating)
@@ -63,14 +63,14 @@
 ## 5. Evaluation Scope
 
 **In scope**:
-- [Feature 1: e.g., Task creation with validation]
-- [Feature 2: e.g., Filtering/search functionality]
-- [Feature 3: e.g., Inline editing]
-- [Feature 4: e.g., Delete with confirmation]
+- Adding tasks with minimal form validation.
+- Editing task titles inline.
+- Mark complete and uncomplete interactions.
+- Deleting tasks with confirmation feedback.
 
 **Out of scope** (not evaluated in this round):
-- [Features deferred to later evaluation]
-- [Known limitations accepted as constraints]
+- User accounts, authentication, or syncing across devices.
+- Advanced filtering, tagging, or bulk actions.
 
 ---
 
@@ -111,10 +111,10 @@
 ## 9. Expected Outcomes
 
 **What will you learn from this evaluation?**
-- [Design question 1 answered]
-- [Design question 2 answered]
-- [Accessibility barriers identified]
-- [Performance bottlenecks quantified]
+- Whether users understand core interactions like add, edit, complete, and delete without hesitation or confusion.
+- Whether feedback messages are visible, meaningful, and correctly communicated to users across different input modes.
+- Which accessibility barriers still exist, especially for keyboard-only and screen-reader participants.
+- Which tasks cause slow performance or repeated errors, helping quantify bottlenecks that need redesign.
 
 **How will results inform redesign?**
 - Findings will be prioritised using (Impact + Inclusion) – Effort matrix

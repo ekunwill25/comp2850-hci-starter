@@ -267,12 +267,12 @@ Backlog: wk9-01 (see backlog/backlog.csv)
 
 Before submitting Task 1 to Gradescope:
 
-- [ ] All screenshots have annotations in `annotations.md`
-- [ ] All pilot notes follow template structure
-- [ ] No PII in any file (screenshots, notes, logs)
-- [ ] Consent confirmed for all participants
-- [ ] Every finding in `05-findings.md` links to evidence here
-- [ ] File names descriptive (not `IMG_1234.jpg`)
+- [/]All screenshots have annotations in `annotations.md`
+- [/] All pilot notes follow template structure
+- [/] No PII in any file (screenshots, notes, logs)
+- [/] Consent confirmed for all participants
+- [/] Every finding in `05-findings.md` links to evidence here
+- [/] File names descriptive (not `IMG_1234.jpg`)
 
 ---
 
