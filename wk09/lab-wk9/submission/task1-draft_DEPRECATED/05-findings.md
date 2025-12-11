@@ -6,16 +6,16 @@
 
 ## Executive Summary
 
-**Pilots conducted**: [n] participants
-**Date range**: [YYYY-MM-DD to YYYY-MM-DD]
+**Pilots conducted**: [5] participants
+**Date range**: [2025-11-29 to 2025-12-10]
 **Variants tested**: Standard (HTMX), keyboard-only, no-JS, [screen reader]
 
 **Key findings**:
-1. [High-priority issue 1 with WCAG reference]
-2. [High-priority issue 2 with inclusion impact]
-3. [Medium-priority issue 3]
+1. SR users unaware of changes (WCAG 4.1.3)
+2. navigation difficulty for P2 & P5 (WCAG 2.4.7)
+3. accidental deletions (UX risk, inclusion impact)
 
-**Recommended fixes for Week 10**: [List 2-3 priority fixes]
+**Recommended fixes for Week 10**: Add delete confirmation dialog + Improve keyboard focus outline (CSS)
 
 ---
 
@@ -25,12 +25,12 @@
 
 | Task | Code | Completion | Notes |
 |------|------|-----------|-------|
-| [Task name] | T1 | [n] / [n] ([%]) | [Any issues?] |
-| [Task name] | T2 | [n] / [n] ([%]) | [Any issues?] |
-| [Task name] | T3 | [n] / [n] ([%]) | [Any issues?] |
-| [Task name] | T4 | [n] / [n] ([%]) | [Any issues?] |
+| [Task name] | T1 | [5] / [5] ([100%]) | None|
+| [Task name] | T2 | [5] / [5] ([100%]) | Slow for P2,P5 |
+| [Task name] | T3 | [5] / [5] ([100%]) | None |
+| [Task name] | T4 | [5] / [5] ([100%]) | Sudden Removal |
 
-**Analysis**: [Interpret completion rates. Which tasks had low completion? Why?]
+**Analysis**: Tasks were completed by all 5 participants, but T2 edits were slower and T4 deletions caused uncertainty for some participants.
 
 **Evidence**:
 - `04-results.csv` lines [X-Y]: [Session IDs] with `step=fail` or incomplete task sequences
@@ -44,12 +44,12 @@
 
 | Task | Code | Median (ms) | Median (s) | MAD (ms) | Range | n |
 |------|------|------------|------------|---------|-------|---|
-| [Task name] | T1 | [X] | [Y]s | [Z] | [min]s–[max]s | [n] |
-| [Task name] | T2 | [X] | [Y]s | [Z] | [min]s–[max]s | [n] |
-| [Task name] | T3 | [X] | [Y]s | [Z] | [min]s–[max]s | [n] |
-| [Task name] | T4 | [X] | [Y]s | [Z] | [min]s–[max]s | [n] |
+| Add | T1 | [910] | [0.9]s | [Low] | [0.8]s–[1.1]s | [1] |
+| Edit | T2 | [1465] | [1.4]s | [Medium] | [1.4]s–[1.5]s | [2] |
+| Complete | T3 | [590] | [0.6]s | [Low] | [0.5]s–[0.7]s | [1] |
+| Delete | T4 | [703] | [0.7]s | [Low] | [0.7]s–[0.8]s | [1] |
 
-**Analysis**: [Interpret times. Which tasks were slow? Why? Any outliers?]
+**Analysis**: T2/Edit was the slowest task, mainly for keyboard-only and screen reader participants, due to lack of clear feedback and unclear focus.
 
 **Evidence**:
 - `04-results.csv`: Filtered `step=success`, calculated median and MAD
@@ -61,12 +61,12 @@
 
 | Task | Code | Validation Errors | Total Attempts | Error Rate | Notes |
 |------|------|------------------|----------------|-----------|-------|
-| [Task name] | T1 | [n] | [n] | [%] | [Error type] |
-| [Task name] | T2 | [n] | [n] | [%] | [Error type] |
-| [Task name] | T3 | [n] | [n] | [%] | [Error type] |
-| [Task name] | T4 | [n] | [n] | [%] | [Error type] |
+| Add | T1 | [0] | [5] | [0%] | [No issues] |
+| Edit| T2 | [0] | [5] | [0%] | [Errors not visible to SR] |
+| Complete | T3 | [0] | [5] | [0%] | [No issues] |
+| Delete | T4 | [0] | [5] | [0%] | Lacked confirmation |
 
-**Analysis**: [Interpret error rates. Which errors were common? Accessibility implications?]
+**Analysis**: No validation errors, but SR users failed to perceive success — equivalent usability barrier.
 
 **Evidence**:
 - `04-results.csv`: Filtered `step=validation_error`, counted occurrences
@@ -76,15 +76,15 @@
 
 ### 1.4 JS-On vs JS-Off Comparison
 
-**Task [X] comparison** (most impacted by JS):
+**Task [4] comparison** (most impacted by JS):
 
 | Variant | Median Time (ms) | n | Notes |
 |---------|-----------------|---|-------|
-| JS-on (HTMX) | [X] | [n] | [Smooth AJAX updates] |
-| JS-off (traditional) | [Y] | [n] | [Full page reloads] |
-| **Difference** | [Z]× slower | | [Expected due to PRG pattern] |
+| JS-on (HTMX) | [703] | [1] | [Smooth AJAX updates] |
+| JS-off (traditional) | [1406] | [1] | [Full page reloads] |
+| **Difference** | [2]× slower | | [Expected due to PRG pattern] |
 
-**Analysis**: [Evaluate no-JS parity. Is slowdown acceptable? Any functional differences?]
+**Analysis**: Functionality is the same in No-JS, but feedback is weaker and slower.
 
 **Evidence**:
 - `04-results.csv`: Filtered `js_mode=off` for session [P3_xxxx]
@@ -96,21 +96,21 @@
 
 ### 2.1 Accessibility Issues
 
-**Finding A1**: [Issue title, e.g., "Validation errors not announced by screen readers"]
+**Finding A1**: Screen reader users could not detect when edit or add actions succeeded.
 
-**Severity**: High (WCAG [X.X.X] violation)
+**Severity**: High (WCAG [4.1.3] violation)
 
 **Affected users**: People navigating with screen readers
 
 **Evidence chain**:
-1. **Raw data**: `04-results.csv` line [X]: Session [P2_xxxx], task [T2], `step=validation_error`
-2. **Observation**: `06-evidence/pilot-notes/P2-notes.md` line [Y]: "[Quote: 'I didn't hear any error message']"
+1. **Raw data**: `04-results.csv` line [18]: Session [P2_2222], task [T2], `step=validation_error`
+2. **Observation**: `06-evidence/pilot-notes/P2-notes.md` line [48]: "Quote: Wait… which one is edit? They look the same."
 3. **Screenshot**: `06-evidence/screenshots/t2-validation-error.png` showing error without `role="alert"`
 4. **WCAG reference**: [4.1.3 Status Messages (AA)] — status changes must be announced
 
 **Impact**:
 - **Inclusion**: SR users cannot detect or correct validation errors → task failure
-- **Frequency**: [X]% of attempts on Task [Y] triggered validation errors
+- **Frequency**: [40]% of attempts on Task [2] triggered validation errors
 - **Criticality**: Blocks task completion for SR users
 
 **Proposed mitigation**: [Specific fix, e.g., "Add role='alert' to error messages, aria-describedby for input association"]
@@ -119,7 +119,7 @@
 
 ---
 
-**Finding A2**: [Next accessibility issue]
+**Finding A2**: Keyboard focus unclear (WCAG 2.4.7)
 
 [Repeat structure: severity, affected users, evidence chain, impact, mitigation, backlog ref]
 
@@ -127,7 +127,7 @@
 
 ### 2.2 Usability Issues
 
-**Finding U1**: [Issue title, e.g., "Filter auto-search confuses some participants"]
+**Finding U1**: Keyboard-only users struggled to see which element was currently selected.
 
 **Severity**: Medium (UX issue, not WCAG violation)
 
@@ -157,14 +157,14 @@
 
 **What worked well** (keep in redesign):
 
-1. [Positive observation 1, e.g., "Delete confirmation dialog clear and effective"]
-   - Evidence: `06-evidence/pilot-notes/P1-notes.md` line [X]: "[Quote: 'Confirmation was clear, I felt confident']"
+1. Task completion was fast
+   - Evidence: `06-evidence/pilot-notes/P1-notes.md` line [120]: "[Good confirmation of progressive enhancement strategy.']"
 
-2. [Positive observation 2, e.g., "Keyboard navigation tab order logical"]
-   - Evidence: `06-evidence/pilot-notes/P2-notes.md` line [Y]: "[Quote: 'All interactive elements reachable via Tab']"
+2. No-JS mode supported full CRUD parity
+   - Evidence: `06-evidence/pilot-notes/P2-notes.md` line [118]: "[No-JS still fully functional — parity mostly achieved.']"
 
-3. [Positive observation 3, e.g., "No-JS parity maintained—all tasks completable"]
-   - Evidence: `04-results.csv`: Session [P3_xxxx] completed all tasks with `js_mode=off`
+3. Form labels accessible
+   - Evidence: `04-results.csv`: Session [P3_3333] completed all tasks with `js_mode=off`
 
 ---
 
@@ -216,16 +216,16 @@ Week 10 fix: Implement aria-live="assertive" + aria-describedby + focus manageme
 
 ### 5.1 Study Limitations
 
-1. **Sample size**: [n] participants (small but typical for formative evaluation—Nielsen's 5-user rule)
-2. **Diversity**: [Limited to peers in COMP2850? Narrow age range? Missing some disability perspectives?]
+1. **Sample size**: [5] participants (small but typical for formative evaluation—Nielsen's 5-user rule)
+2. **Diversity**: Peer-only
 3. **Context**: Lab setting (not real-world usage—may miss long-term patterns)
 4. **Tasks**: Artificial scenarios (real tasks might reveal different issues)
 
 ### 5.2 Data Quality Issues
 
-- [Any missing data? Server crashes? Timing anomalies?]
-- [Any excluded data? Why?]
-- [Any bias in facilitation? Leading questions?]
+- No missing data, no crashes
+- Minor timing variance due to manual stopwatch checks
+- Potential facilitation bias minimized by script use
 
 ### 5.3 Future Evaluations
 
@@ -244,9 +244,9 @@ Week 10 fix: Implement aria-live="assertive" + aria-describedby + focus manageme
 ## 6. Conclusion
 
 **Summary of key findings**:
-1. [High-priority issue 1]
-2. [High-priority issue 2]
-3. [Medium-priority issue 3]
+1. Missing announcements blocked SR users
+2. Unclear focus hindered navigation
+3. Delete lacked confirmation and created uncertainty
 
 **Recommended actions**:
 - Week 10 Lab 1: Detailed analysis with `Analyse.kt`, prioritise fixes
@@ -283,7 +283,7 @@ See [Glossary](../../references/glossary.md) for full definitions.
 
 ---
 
-**Author**: [Your name]
-**Date**: [YYYY-MM-DD]
+**Author**: William Ladepo
+**Date**: [2025-12-10]
 **Version**: Draft for Task 1 submission
 **Next review**: Week 11 (finalize for portfolio)

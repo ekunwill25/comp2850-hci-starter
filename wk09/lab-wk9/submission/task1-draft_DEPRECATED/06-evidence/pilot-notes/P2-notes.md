@@ -1,97 +1,139 @@
 # Pilot 2 Notes
 
-**Session ID**: P2_d61b
-**Date**: 2025-12-08
-**Time**: 14:15–14:28
-**Variant**: Keyboard-only
-**Facilitator**: William
-**Observer**: —
-**Consent confirmed**: Yes
+**Session ID**: P2_2222  
+**Date**: 2025-12-09  
+**Time**: 13:22–13:38  
+**Variant**: Keyboard-only (HTMX on)  
+**Facilitator**: William Ekundayo (201843237)  
+**Observer**: N/A  
+**Consent confirmed**: Yes  
 
 ---
 
 ## Pre-Session
-- Confirmed JS on.
-- User tested tab + enter navigation.
+
+- Participant asked if mouse was allowed; reminded keyboard-only requirement.
+- JS mode ON confirmed; Tab order tested briefly.
 
 ---
 
-## Task 1 Add
-Start 14:16:00  
-End 14:16:35  
-Duration 35s  
-Outcome Partial  
+## Task 1 (T1_add): Add Task
 
-Observations
-- Focus order worked
-- Participant quote: “The add button is a long way down”
+**Start time**: 13:23:10  
+**End time**: 13:23:16  
+**Duration**: 6s  
+**Outcome**: Success  
 
-Issues
-- Had to tab many times
+**Observations**:
+- 13:23 — Participant tabbed through fields smoothly.
+- 13:23 — Quote: "Okay, this part is easy enough."
+- 13:23 — Facilitator noted confident typing and submission.
 
-Success criteria: Partial – task added but slow
+**Issues**:
+- None; keyboard workflow worked as intended.
 
----
-
-## Task 2 Edit
-Start 14:17:00  
-End 14:18:10  
-Duration 70s  
-Outcome: Partial  
-
-Observations
-- Tab skip on input unclear
-- “Didn’t know if edit saved”
-
-Issues
-- No audible confirmation
-
-Success criteria: Partial
+**Success criteria met**: Yes — task appeared correctly with no errors.
 
 ---
 
-## Task 3 Delete
-Start 14:18:20  
-End 14:18:50  
-Duration 30s  
-Outcome: Success
+## Task 2 (T2_edit): Edit Task
 
-Issues
-- None
+**Start time**: 13:24:00  
+**End time**: 13:24:15  
+**Duration**: 15s  
+**Outcome**: Success-with-errors  
 
----
+**Observations**:
+- 13:24 — Participant tabbed to wrong icon first.
+- 13:24 — Quote: "Wait… which one is edit? They look the same."
+- 13:24 — Initial submit caused validation error (blank title).
 
-## Task 4 Filter
-Start 14:19:05  
-End 14:19:50  
-Duration 45s  
-Outcome: Success
+**Issues**:
+- Edit affordance unclear for non-visual exploration.  
+- Validation error **not announced** — SR pilot issue mirrored.
 
----
-
-## Post-Session
-Ratings:
-- Confidence 3/5
-- Ease 3/5
-- Recommend 3/5
-
-Confusing
-- “No confirmation sound”
-
-Worked well
-- “Layout is simple”
-
-Accessibility barrier
-- Required lots of tab presses
-
-Suggestions
-- Add skip links
+**Success criteria met**: Partial — completed after correction.
 
 ---
 
-## Reflection
-Keyboard navigation slower than expected.
+## Task 3 (T3_complete): Mark Complete
 
-## Evidence
-Screenshots: keyboard-tabbing.png
-Backlog: wk9-03 focus improvements
+**Start time**: 13:25:40  
+**End time**: 13:25:42  
+**Duration**: 2s  
+**Outcome**: Success  
+
+**Observations**:
+- 13:25 — Participant used Spacebar to toggle checkbox successfully.
+- 13:25 — Quote: "Nice, that was straightforward."
+
+**Issues**:
+- None.
+
+**Success criteria met**: Yes.
+
+---
+
+## Task 4 (T4_delete): Delete Task
+
+**Start time**: 13:26:20  
+**End time**: 13:26:23  
+**Duration**: 3s  
+**Outcome**: Success  
+
+**Observations**:
+- 13:26 — Participant pressed Enter on delete icon.
+- 13:26 — Quote: "It’s gone already? No confirmation?"
+- 13:26 — Participant seemed surprised by immediate deletion.
+
+**Issues**:
+- No confirmation.  
+- Keyboard-only users get *zero* deletion feedback.
+
+**Success criteria met**: Partial — task deleted but confusing.
+
+---
+
+## Post-Session Debrief (5 min)
+
+**Subjective ratings**:
+- Overall confidence: 3 / 5  
+- Ease of use: 3 / 5  
+- Would recommend: 3 / 5  
+
+**Open questions**:
+
+1. *"What was most confusing or frustrating?"*  
+   - Response: "Edit and delete icons were too similar."
+
+2. *"What worked well?"*  
+   - Response: "Keyboard navigation mostly made sense."
+
+3. *"Any accessibility barriers?"*  
+   - Response: "Focus was unclear sometimes; lost track of where I was."
+
+**Participant suggestions**:
+- "Add keyboard focus outlines so I know where I am."
+
+---
+
+## Facilitator Reflection
+
+- Keyboard navigation exposed issues hidden from mouse users.
+- Missing focus outlines and silent validation errors are major barriers.
+- Data quality good; timestamps align with server logs.
+
+---
+
+## Evidence Links
+
+**Quantitative data**: `04-results.csv` lines 3–7 (session_id=P2_2222)  
+**Screenshots**:  
+- `t2-validation-error.png`  
+- `t4-delete-no-confirm.png`  
+- `focus-missing.png`  
+
+**Backlog items**:  
+- wk9-01 (Validation errors not announced)  
+- wk9-02 (Edit affordance unclear)  
+- wk9-05 (Missing visible focus indicator)

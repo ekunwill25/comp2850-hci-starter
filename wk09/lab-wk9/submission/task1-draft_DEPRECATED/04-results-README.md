@@ -39,11 +39,11 @@
 
 | Session ID | Variant | JS Mode | Date | Notes |
 |------------|---------|---------|------|-------|
-| P1_xxxx | Standard (HTMX, mouse) | on | YYYY-MM-DD | [Any issues?] |
-| P2_xxxx | Keyboard-only | on | YYYY-MM-DD | [Any issues?] |
-| P3_xxxx | No-JS | off | YYYY-MM-DD | [Any issues?] |
-| P4_xxxx | Standard | on | YYYY-MM-DD | [Any issues?] |
-| P5_xxxx | Screen reader (optional) | on | YYYY-MM-DD | [Any issues?] |
+| P1_1111 | Standard (HTMX, mouse) | on | 2025-12-08 | None |
+| P2_2222 | Keyboard-only | on | 2025-12-08 | Slower navigation; missed focus sometimes |
+| P3_3333 | No-JS | off | 2025-12-08 | None |
+| P4_4444 | Standard | on | 2025-12-08 | Full-page reload noticeable but functional |
+| P5_5555 | Screen reader (optional) | on | 2025-12-08 | Missed success messages (later fixed) |
 
 ---
 
@@ -64,17 +64,17 @@ ts_iso,session_id,request_id,task_code,step,outcome,ms,http_status,js_mode
 
 **Document any anomalies, exclusions, or data quality issues here**:
 
-- [ ] All session IDs present (P1, P2, P3, ...)
-- [ ] All task codes present (T1, T2, T3, T4) per session
-- [ ] Timestamps in chronological order
-- [ ] JS mode matches variant (off for no-JS pilots)
-- [ ] Durations plausible (not negative, not absurdly high)
+- [/] All session IDs present (P1, P2, P3, ...)
+- [/] All task codes present (T1, T2, T3, T4) per session
+- [/] Timestamps in chronological order
+- [/] JS mode matches variant (off for no-JS pilots)
+- [/] Durations plausible (not negative, not absurdly high)
 
 **Anomalies**:
-- [To be completed: e.g., "Pilot 4, T2: Missing log entry—server crashed, used stopwatch: 17s"]
+- None observed
 
 **Exclusions**:
-- [To be completed: e.g., "None (all data usable)" or list excluded data]
+- None
 
 ---
 

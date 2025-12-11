@@ -1,1 +1,6 @@
 ts_iso,session_id,request_id,task_code,step,outcome,ms,http_status,js_mode
+2025-12-09T13:06:17Z,P1_1111,req_001,T1_add,success,,910,200,on
+2025-12-09T13:26:41Z,P2_2222,req_002,T2_edit,success,,1420,200,on
+2025-12-09T13:42:58Z,P3_3333,req_003,T3_complete,success,,590,200,on
+2025-12-09T14:03:19Z,P4_4444,req_004,T4_delete,success,,703,200,off
+2025-12-09T14:32:44Z,P5_5555,req_005,T2_edit,success,,1510,200,on
