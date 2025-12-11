@@ -1,8 +1,8 @@
 # Redesign Brief — Task 2: Inclusive Redesign
 
-**Author**: [Your name]
-**Date**: [YYYY-MM-DD]
-**Version**: [Draft / Final]
+**Author**: William Ekundayo
+**Date**: [2025-12-10]
+**Version**: [Draft]
 
 ---
 
@@ -10,12 +10,12 @@
 
 **1-2 sentences grounded in Week 9 analysis + Week 7 audit**:
 
-[Example: "Validation errors on the task edit form (T2) are not announced to screen readers, causing a 33% error rate and blocking task completion for SR users. Week 9 pilots (n=5) showed 2/5 participants using keyboard-only mode could not detect or correct blank submission errors (WCAG 4.1.3 violation)."]
+Validation and success messages on the edit task form (T2) were not announced to screen-reader users, causing confusion, slower task completion, and silent failures. Week 9 pilots showed 2/5 participants (keyboard-only and SR variants) unable to detect blank-title errors, confirming WCAG 4.1.3 and 3.3.1 violations.
 
 **Evidence**:
-- Week 9 Lab 2: `05-findings.md` section [X] (Finding A1)
-- Week 9 metrics: `04-results.csv` lines [X-Y] (session IDs: P2_xxxx, P3_xxxx)
-- Week 7 audit: `lab-w7/a11y/audit-template.md` issue [#X]
+- Week 9 Lab 2: `05-findings.md` (Finding A1)
+- Week 9 metrics: `04-results.csv` (session IDs: P2_2222, P3_3333)
+- Week 7 audit: `lab-w7/a11y/audit-template.md` issue [#3]
 
 **WCAG Violations**:
 - **4.1.3 Status Messages (AA)**: Status changes must be announced to assistive tech
@@ -35,10 +35,10 @@
 | **SR accessibility** | 0% pass (errors not announced) | 100% pass (errors announced + linked) | WCAG 4.1.3 compliance |
 
 **Success criteria**:
-- [ ] Error rate reduced to ≤ 10%
-- [ ] Completion rate = 100%
-- [ ] All SR users can detect and correct errors independently
-- [ ] No regression in existing functionality
+- [/] Error rate reduced to ≤ 10%
+- [/] Completion rate = 100%
+- [/] All SR users can detect and correct errors independently
+- [/] No regression in existing functionality
 
 ---
 
@@ -60,25 +60,24 @@
 ## Societal Impact (LO10)
 
 **Who is excluded by the current design?**
-- [Identify specific marginalised groups: e.g., "People who rely on screen readers for employment, education, or civic participation"]
-- [Example: "Disabled people navigating web forms are systematically excluded when validation errors aren't accessible—this affects job applications, banking, healthcare booking, etc."]
+- People who rely on screen readers for daily navigation: blind users, low-vision users, users with cognitive disabilities.
+- Disabled students who depend on accessible tools for coursework/task management.
 
 **Broader societal implications**:
-- [Analyse systemic barriers, not just individual inconvenience]
-- [Example: "When task management apps aren't accessible, disabled students cannot participate equally in group work, perpetuating educational inequity"]
-- [Example: "Inaccessible error handling reinforces the false narrative that 'disabled people can't use computers'—shifting blame from bad design to people"]
+- Inaccessible validation patterns mirror common barriers in job applications, government forms, banking portals, and healthcare booking systems.
+- Poor error feedback reinforces systemic inequality by placing responsibility on disabled users rather than poor design.
 
 **How does this fix address systemic barriers?**
-- [Explain how the fix moves beyond accommodation toward universal design]
-- [Example: "Making error messages screen-reader accessible doesn't just 'help' disabled people—it creates a more robust, testable system that benefits all users (better error handling reduces support costs, improves reliability)"]
+- Implements universal design: robust, testable, equitable feedback mechanisms for all users—not separate “accommodations.”
+- Reduces error rates for everyone, not only disabled users.
 
 **Ethical considerations**:
-- [Consider privacy, autonomy, dignity]
-- [Example: "Current design forces SR users to ask sighted colleagues for help with validation errors, violating privacy and autonomy"]
+- Removes situations where SR users must reveal sensitive mistakes to others—protecting privacy and autonomy.
+- Ensures fairness and equal access by providing the same actionable information to all users.
 
 **Long-term impact**:
-- [What changes if this pattern were adopted widely?]
-- [Example: "If all web forms implemented accessible error handling, millions of disabled people could complete tasks independently, reducing reliance on assistance and improving employment/education access"]
+- If widely adopted, accessible validation would dramatically improve digital independence for millions of disabled people.
+- Reduces educational and workplace inequalities tied to inaccessible digital systems
 
 **References**:
 - [Link to Week 7 Lab 1 ethics reflection if relevant]
